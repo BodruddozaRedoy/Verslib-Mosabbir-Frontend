@@ -1,4 +1,4 @@
-name: Full Replace Deploy - Verselib Frontend
+name: Full Replace CI/CD - Verselib Frontend
 
 on:
   push:
@@ -7,24 +7,41 @@ on:
 
 jobs:
   deploy:
+    name: Build and Deploy to VPS
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1 — Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2 — Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
+      # Step 3 — Cache npm packages (optional but speeds up builds)
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
+      # Step 4 — Install dependencies (with Rollup fix)
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
+
+      # Step 5 — Build project
       - name: Build project
         run: npm run build
 
-      - name: Connect to VPS and fully replace project
+      # Step 6 — Clean server & prepare for new code
+      - name: Connect to VPS and remove old project
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -33,10 +50,11 @@ jobs:
           script: |
             echo "🧹 Removing old project..."
             rm -rf /var/www/verselib-frontend
-            echo "📁 Creating fresh folder..."
             mkdir -p /var/www/verselib-frontend
-            exit
-      - name: Upload new build to VPS
+            echo "✅ Server cleaned."
+
+      # Step 7 — Upload new build to VPS
+      - name: Upload new project to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -45,3 +63,15 @@ jobs:
           source: "./"
           target: "/var/www/verselib-frontend"
           overwrite: true
+
+      # Optional verification
+      - name: Verify upload
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "📂 Listing deployed directory:"
+            ls -al /var/www/verselib-frontend
+            echo "🚀 Deployment completed successfully!"
