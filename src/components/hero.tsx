@@ -22,7 +22,7 @@ export function Hero() {
             </button>
 
             <h2 className="text-center text-5xl w-full max-w-2xl text-foreground font-black leading-[58px] top-bottom-gradient">
-                Ready-to-Use Figma Designs for a Faster Workflow
+                Ready to Use Figma Designs for a Faster Workflow
             </h2>
 
             <div className="w-full max-w-lg justify-center flex relative">
