@@ -133,9 +133,9 @@ export function SVGpreview({
                 <Text variant="sub-title" className="text-white">
                     {name}
                 </Text>
-                <Text className="text-md text-white/40">
+                {/* <Text className="text-md text-white/40">
                     Loreml klfdsjalkfjds lkafjdklsjafkl sdafjlksajflkajdkl
-                </Text>
+                </Text> */}
             </div>
         </div>
     );

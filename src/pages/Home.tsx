@@ -20,7 +20,7 @@ const breakpointColumnsObj = {
     500: 1, // sm
 };
 
-export default function Page() {
+export default function Home() {
     const { data: filesData, isLoading: filesLoading } = useGetFiles({
         limit: 15,
         offset: 0,
